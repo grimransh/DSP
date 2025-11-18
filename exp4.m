@@ -1,0 +1,13 @@
+clc;
+rp=1;
+rs=45;
+fs=50000;
+f= [10000 12000 16000 18000];
+a= [0 1 0];
+dev=[10^(-rs/20) (10^(rp/20)-1)/(10^(rp/20) +1) 10^(-rs/20)];
+[n, fo, ao, w] =firpmord (f, a, dev, fs);
+disp ('length of filter is');
+disp(n);
+b=firpm (n, fo, ao, w);
+freqz(b);
+title('Bandpass');
