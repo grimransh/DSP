@@ -1,0 +1,245 @@
+111111111111111111111111111111111111111111111111111111111111111111111111111
+module dec3x8(din, dout);
+    input  [2:0] din;
+    output [7:0] dout;
+
+    assign dout = (din == 3'b000) ? 8'b00000001 :
+                  (din == 3'b001) ? 8'b00000010 :
+                  (din == 3'b010) ? 8'b00000100 :
+                  (din == 3'b011) ? 8'b00001000 :
+                  (din == 3'b100) ? 8'b00010000 :
+                  (din == 3'b101) ? 8'b00100000 :
+                  (din == 3'b110) ? 8'b01000000 :
+                                   8'b10000000 ;
+endmodule
+
+
+
+
+module tb_dec3x8;
+
+reg  [2:0] din;
+wire [7:0] dout;
+
+dec3x8 dut(din, dout);
+
+initial begin
+    din = 0;
+    repeat (8) begin
+        #10 din = din + 1;
+    end
+end
+
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+22222222222222222222222222222222222222222222222222222222222222222222
+
+module mux8to1 (d, s, y);
+    input  [7:0] d;   // 8 inputs
+    input  [2:0] s;   // select
+    output y;
+
+    assign y = d[s];  // simplest form
+endmodule
+
+
+module tb_mux8to1;
+
+reg  [7:0] d;
+reg  [2:0] s;
+wire y;
+
+mux8to1 dut(d, s, y);
+
+initial begin
+    d = 8'b10101010; // sample pattern
+
+    s = 0; #10;
+    s = 1; #10;
+    s = 2; #10;
+    s = 3; #10;
+    s = 4; #10;
+    s = 5; #10;
+    s = 6; #10;
+    s = 7; #10;
+
+    #10 $finish;
+end
+
+endmodule
+
+
+
+
+
+
+
+module demux1to8 (din, s, y);
+    input din;         // single input
+    input [2:0] s;     // select
+    output [7:0] y;
+
+    assign y = 8'b00000000 | (din << s);
+endmodule
+
+
+
+module tb_demux1to8;
+
+reg din;
+reg [2:0] s;
+wire [7:0] y;
+
+demux1to8 dut(din, s, y);
+
+initial begin
+    din = 1;
+
+    s = 0; #10;
+    s = 1; #10;
+    s = 2; #10;
+    s = 3; #10;
+    s = 4; #10;
+    s = 5; #10;
+    s = 6; #10;
+    s = 7; #10;
+
+    #10 $finish;
+end
+
+endmodule
+
+
+
+
+
+
+
+3333333333333333333333333333333333333333333333333333333333333333333333333333
+
+module add_sub_4bit(A, B, mode, Y, carry_borrow);
+
+    input  [3:0] A, B;
+    input        mode;            // 0 = add, 1 = subtract
+    output [3:0] Y;
+    output       carry_borrow;
+
+    wire [3:0] Bx;
+
+    assign Bx = B ^ {4{mode}};    // invert B if subtract
+    assign {carry_borrow, Y} = A + Bx + mode;
+
+endmodule
+
+
+module tb_add_sub_4bit;
+
+reg  [3:0] A, B;
+reg        mode;
+wire [3:0] Y;
+wire       carry_borrow;
+
+add_sub_4bit dut(A, B, mode, Y, carry_borrow);
+
+initial begin
+    // Addition
+    mode = 0;
+    A = 4'b0101; B = 4'b0011; #10;   // 5 + 3
+
+    // Subtraction
+    mode = 1;
+    A = 4'b1001; B = 4'b0011; #10;   // 9 - 3
+
+    mode = 1;
+    A = 4'b0100; B = 4'b0110; #10;   // 4 - 6 (borrow)
+
+    #10 $finish;
+end
+
+endmodule
+
+
+
+
+4444444444444444444444444444444444444444444444444444444444444444444444444444
+module comp4bit(A, B, less, equal, greater);
+    input  [3:0] A, B;
+    output       less, equal, greater;
+
+    assign less    = (A <  B);
+    assign equal   = (A == B);
+    assign greater = (A >  B);
+
+endmodule
+
+
+
+module tb_comp4bit;
+
+reg  [3:0] A, B;
+wire less, equal, greater;
+
+comp4bit dut(A, B, less, equal, greater);
+
+initial begin
+    A = 4'b0101; B = 4'b0101; #10; // equal
+    A = 4'b0011; B = 4'b0100; #10; // less
+    A = 4'b1100; B = 4'b0111; #10; // greater
+
+    #10 $finish;
+end
+
+endmodule
+
+
+
+
+5555555555555555555555555555555555555555555555555555555555555555555555555555555
+module mod10_counter(clk, reset, count);
+    input  clk, reset;
+    output reg [3:0] count;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            count <= 4'd0;
+        else if (count == 4'd9)
+            count <= 4'd0;
+        else
+            count <= count + 1;
+    end
+endmodule
+
+
+
+
+
+module tb_mod10_counter;
+
+reg clk, reset;
+wire [3:0] count;
+
+mod10_counter dut(clk, reset, count);
+
+// clock
+always #5 clk = ~clk;
+
+initial begin
+    clk = 0;
+    reset = 1; #10;
+    reset = 0;
+
+    #200;  // let counter run
+    $finish;
+end
+
+endmodule
